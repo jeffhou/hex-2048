@@ -1,0 +1,199 @@
+<!doctype html>
+<html>
+    <head>
+        <meta charset="UTF-8" />
+        <title>hello phaser!</title>
+        <script src="phaser.js"></script>
+    </head>
+    <body>
+
+    <script type="text/javascript">
+
+    window.onload = function() {
+
+        //  Note that this html file is set to pull down Phaser 2.5.0 from the JS Delivr CDN.
+        //  Although it will work fine with this tutorial, it's almost certainly not the most current version.
+        //  Be sure to replace it with an updated version before you start experimenting with adding your own code.
+
+        var game = new Phaser.Game(800, 600, Phaser.AUTO, '', { preload: preload, create: create, update: update });
+
+        function preload () {
+
+            game.load.image('logo', 'phaser.png');
+
+        }
+
+        function create () {
+          upKey = game.input.keyboard.addKey(Phaser.Keyboard.UP);
+          downKey = game.input.keyboard.addKey(Phaser.Keyboard.DOWN);
+          leftKey = game.input.keyboard.addKey(Phaser.Keyboard.LEFT);
+          rightKey = game.input.keyboard.addKey(Phaser.Keyboard.RIGHT);
+
+          var logo = game.add.sprite(game.world.centerX, game.world.centerY, 'logo');
+          logo.anchor.setTo(0.5, 0.5);
+          timer = game.time.create(false);
+          timer.start()
+
+          grid = [[0, 0, 0, 0], [0, 0, 0, 0], [0, 0, 0, 0], [0, 0, 0, 0]]
+        }
+
+        function update() {
+          if (timer.events.length == 0) {
+            /* TODO: Add key locks so only after a key is down and then up
+               will it be considered pressed. (Prevents duplicate key press
+               events.) Use isUp on the keys to accomplish this. */
+            if (upKey.isDown) {
+              console.log("UP");
+              collapseUp();
+              timer.add(1500, fadePictures, this);
+            } else if (downKey.isDown) {
+              console.log("DOWN");
+              collapseDown();
+              timer.add(1500, fadePictures, this);
+            } else if (leftKey.isDown) {
+              console.log("LEFT");
+              collapseLeft();
+              timer.add(1500, fadePictures, this);
+            } else if (rightKey.isDown) {
+              console.log("RIGHT");
+              collapseRight();
+              timer.add(1500, fadePictures, this);
+            }
+          }
+        }
+
+        function addRandomBlock() {
+          var freeBlocks = []
+          for (let i = 0; i < 4; i++) {
+            for (let j = 0; j < 4; j++) {
+              if (grid[i][j] == 0) {
+                freeBlocks.push([i, j]);
+              }
+            }
+          }
+          a = (Math.random() * freeBlocks.length)
+
+          var blockPosition = freeBlocks[parseInt(Math.random() * freeBlocks.length)];
+          var blockNumber = [2, 4][parseInt(Math.random() * 2)];
+          grid[blockPosition[0]][blockPosition[1]] = blockNumber;
+        }
+
+
+        function collapseLeft() {
+          for (let i = 0; i < 4; i++) {
+            var noZeroRow = [];
+            var finalRow = [];
+            for (let j = 0; j < 4; j++) {
+              if (grid[j][i] != 0) {
+                noZeroRow.push(grid[j][i])
+              }
+            }
+            var j = 0;
+            while (j < noZeroRow.length) {
+              if (noZeroRow[j] == noZeroRow[j+1]) {
+                // Should Combine Blocks
+                finalRow.push(noZeroRow[j] * 2);
+                j++;
+              } else {
+                // Shouldn't Combine Blocks
+                finalRow.push(noZeroRow[j]);
+              }
+              j++;
+            }
+            while (finalRow.length < 4) {
+              finalRow.push(0);
+            }
+            for (let j = 0; j < 4; j++) {
+              grid[j][i] = finalRow[j];
+            }
+          }
+        }
+
+        function collapseRight() {
+          for (let i = 0; i < 4; i++) {
+            var tempRow = [];
+            var noZeroRow = [];
+            var finalRow = [];
+            for (let j = 0; j < 4; j++) {
+                tempRow.push(grid[j][i]);
+            }
+            tempRow.reverse();
+            for (let j = 0; j < 4; j++) {
+              if (tempRow[j] != 0) {
+                noZeroRow.push(tempRow[j])
+              }
+            }
+            var j = 0;
+            while (j < noZeroRow.length) {
+              if (noZeroRow[j] == noZeroRow[j+1]) {
+                // Should Combine Blocks
+                finalRow.push(noZeroRow[j] * 2);
+                j++;
+              } else {
+                // Shouldn't Combine Blocks
+                finalRow.push(noZeroRow[j]);
+              }
+              j++;
+            }
+            while (finalRow.length < 4) {
+              finalRow.push(0);
+            }
+            finalRow.reverse();
+            for (let j = 0; j < 4; j++) {
+              grid[j][i] = finalRow[j];
+            }
+          }
+        }
+
+        function collapseUp() {
+          for (let i = 0; i < 4; i++) {
+            grid[i].reverse()
+          }
+          collapseDown();
+          for (let i = 0; i < 4; i++) {
+            grid[i].reverse()
+          }
+        }
+
+        function collapseDown() {
+          for (let i = 0; i < 4; i++) {
+            var noZeroRow = [];
+            var finalRow = [];
+            for (let j = 0; j < 4; j++) {
+              if (grid[i][j] != 0) {
+                noZeroRow.push(grid[i][j])
+              }
+            }
+            var j = 0;
+            while (j < noZeroRow.length) {
+              if (noZeroRow[j] == noZeroRow[j+1]) {
+                // Should Combine Blocks
+                finalRow.push(noZeroRow[j] * 2);
+                j++;
+              } else {
+                // Shouldn't Combine Blocks
+                finalRow.push(noZeroRow[j]);
+              }
+              j++;
+            }
+            while (finalRow.length < 4) {
+              finalRow.push(0);
+            }
+            grid[i] = finalRow;
+          }
+        }
+
+        function fadePictures () {
+          console.log("~~~~");
+          addRandomBlock();
+          console.log(grid[0].toString());
+          console.log(grid[1].toString());
+          console.log(grid[2].toString());
+          console.log(grid[3].toString());
+        }
+    };
+
+    </script>
+
+    </body>
+</html>
