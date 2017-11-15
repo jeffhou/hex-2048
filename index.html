@@ -20,7 +20,6 @@
     <script type="text/javascript">
     /*
       Task Board
-      TODO - Add in additional tier differentiators: size and color.
       TODO - Display instructions with new game.
       TODO - Display achievements when game ends.
       TODO - Wrap up the canvas in nice landing page.
@@ -67,6 +66,8 @@
         }
 
         function setUpDisplay() {
+          valueSizes = {2: 48, 4: 48, 8: 48, 16: 48, 32: 48, 64: 48, 128: 48, 256: 48, 512: 48, 1024: 32, 2048: 32, 4096: 32, 8192: 32, 16384: 32, 32768: 32};
+          valueColors = {2: "fff", 4: "add", 8: "5bb", 16: "f99", 32: "dc8", 64: "be7", 128: "711", 256: "513", 512: "315", 1024: "117", 2048: "ff9", 4096: "eea", 8192: "ddc", 16384: "cce", 32768: "55f"};
           var graphics = game.add.graphics(0, 0);
           graphics.beginFill(0x458b6d);
           graphics.lineStyle(BORDER_WIDTH * 2, 0x396754, 1);
@@ -101,7 +102,7 @@
           for (let i = 0; i < 4; i++) {
             for (let j = 0; j < 4; j++) {
               if (grid[i][j] != 0) {
-                let text = game.add.text(BORDER_WIDTH, BORDER_WIDTH, grid[i][j], { font: "32px upheaval", fill: "#fff", boundsAlignH: "center", boundsAlignV: "middle"})
+                let text = game.add.text(BORDER_WIDTH, BORDER_WIDTH, grid[i][j], { font: valueSizes[grid[i][j]] + "px upheaval", fill: "#" + valueColors[grid[i][j]], boundsAlignH: "center", boundsAlignV: "middle"})
                 text.setTextBounds(BORDER_WIDTH + i * TILE_SIZE, BORDER_WIDTH + (3 - j) * TILE_SIZE, TILE_SIZE - 2 * BORDER_WIDTH, TILE_SIZE - 2 * BORDER_WIDTH);
                 tiles.push(text);
               }
