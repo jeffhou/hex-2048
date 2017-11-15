@@ -6,6 +6,9 @@
         <script src="phaser.js"></script>
         <link href='https://fonts.googleapis.com/css?family=Abel' rel='stylesheet'>
         <style>
+          body {
+            background-color: black;
+          }
           @font-face {
             font-family: upheaval;
             src: url(upheaval.otf);
@@ -15,84 +18,123 @@
     <body>
 
     <script type="text/javascript">
+    /*
+      Task Board
+      BUG - New block generated after accepted user input even when tiles don't move.
+      BUG - When board is full, game still tries to generate new block and then crashes.
+      TODO - Add in additional tier differentiators: size and color.
+      TODO - Display instructions with new game.
+      TODO - Display achievements when game ends.
+      TODO - Wrap up the canvas in nice landing page.
 
+      Brainstorm Board
+      TODO - Add motion.
+    */
+    const TILE_SIZE = 128;
+    const BORDER_WIDTH = 5;
+    const CANVAS_SIZE = BORDER_WIDTH * 2 + 4 * TILE_SIZE;
     window.onload = function() {
 
         //  Note that this html file is set to pull down Phaser 2.5.0 from the JS Delivr CDN.
         //  Although it will work fine with this tutorial, it's almost certainly not the most current version.
         //  Be sure to replace it with an updated version before you start experimenting with adding your own code.
 
-        game = new Phaser.Game(522, 522, Phaser.AUTO, '', { preload: preload, create: create, update: update });
+        game = new Phaser.Game(CANVAS_SIZE, CANVAS_SIZE, Phaser.AUTO, '', { preload: preload, create: create, update: update });
 
         function preload () {
             game.load.image('logo', 'phaser.png');
         }
 
-        function create () {
+        function setUpKeys() {
           upKey = game.input.keyboard.addKey(Phaser.Keyboard.UP);
           downKey = game.input.keyboard.addKey(Phaser.Keyboard.DOWN);
           leftKey = game.input.keyboard.addKey(Phaser.Keyboard.LEFT);
           rightKey = game.input.keyboard.addKey(Phaser.Keyboard.RIGHT);
-          texts = [];
-          //var logo = game.add.sprite(game.world.centerX, game.world.centerY, 'logo');
-          //logo.anchor.setTo(0.5, 0.5);
-          timer = game.time.create(false);
-          timer.start();
+          pressEnabled = true;
+        }
 
-          grid = [[0, 0, 0, 0], [0, 0, 0, 0], [0, 0, 0, 0], [0, 0, 0, 0]];
+        function setUpTiles() {
+          tiles = [];
+        }
+
+        function setUpGrid() {
+          grid = [
+            [0, 0, 0, 0],
+            [0, 0, 0, 0],
+            [0, 0, 0, 0],
+            [0, 0, 0, 0]
+          ];
           addRandomBlock();
           addRandomBlock();
+        }
 
+        function setUpDisplay() {
           var graphics = game.add.graphics(0, 0);
           graphics.beginFill(0x458b6d);
-          graphics.lineStyle(10, 0x396754, 1);
+          graphics.lineStyle(BORDER_WIDTH * 2, 0x396754, 1);
           for (let i = 0; i < 4; i++) {
             for (let j = 0; j < 4; j++) {
-              graphics.drawRect(5 + i * 128, 5 + j * 128, 128, 128);
+              graphics.drawRect(BORDER_WIDTH + i * TILE_SIZE, BORDER_WIDTH + j * TILE_SIZE, TILE_SIZE, TILE_SIZE);
             }
           }
           graphics.endFill();
         }
 
-        function update() {
-          while (texts.length > 0) {
-            texts.pop().destroy();
+        function setUpTimer() {
+          timer = game.time.create(false);
+          timer.start();
+        }
+
+        function create () {
+          setUpKeys();
+          setUpTiles();
+          setUpGrid();
+          setUpDisplay();
+          //setUpTimer();
+        }
+
+        function clearOldTiles() {
+          while (tiles.length > 0) {
+            tiles.pop().destroy();
           }
+        }
+
+        function generateNewTiles() {
           for (let i = 0; i < 4; i++) {
             for (let j = 0; j < 4; j++) {
               if (grid[i][j] != 0) {
-                let text = game.add.text(5, 5, grid[i][j], { font: "32px upheaval", fill: "#fff", boundsAlignH: "center", boundsAlignV: "middle"})
-                text.setTextBounds(5 + i * 128, 5 + (3 - j) * 128, 118, 118);
-                texts.push(text);
+                let text = game.add.text(BORDER_WIDTH, BORDER_WIDTH, grid[i][j], { font: "32px upheaval", fill: "#fff", boundsAlignH: "center", boundsAlignV: "middle"})
+                text.setTextBounds(BORDER_WIDTH + i * TILE_SIZE, BORDER_WIDTH + (3 - j) * TILE_SIZE, TILE_SIZE - 2 * BORDER_WIDTH, TILE_SIZE - 2 * BORDER_WIDTH);
+                tiles.push(text);
               }
             }
           }
-          if (timer.events.length == 0) {
-            /* TODO: Add key locks so only after a key is down and then up
-               will it be considered pressed. (Prevents duplicate key press
-               events.) Use isUp on the keys to accomplish this. */
-            if (upKey.isDown) {
-              console.log("UP");
-              collapseUp();
+        }
+
+        function processUserInput() {
+          if (pressEnabled){
+            if (upKey.isDown || downKey.isDown || leftKey.isDown || rightKey.isDown) {
+              pressEnabled = false;
+              if (upKey.isDown) {
+                collapseUp();
+              } else if (downKey.isDown) {
+                collapseDown();
+              } else if (leftKey.isDown) {
+                collapseLeft();
+              } else if (rightKey.isDown) {
+                collapseRight();
+              }
               addRandomBlock();
-              timer.add(150, fadePictures, this);
-            } else if (downKey.isDown) {
-              console.log("DOWN");
-              collapseDown();
-              addRandomBlock();
-              timer.add(150, fadePictures, this);
-            } else if (leftKey.isDown) {
-              console.log("LEFT");
-              collapseLeft();
-              addRandomBlock();
-              timer.add(150, fadePictures, this);
-            } else if (rightKey.isDown) {
-              console.log("RIGHT");
-              collapseRight();
-              addRandomBlock();
-              timer.add(150, fadePictures, this);
             }
+          } else if (!(upKey.isDown || downKey.isDown || leftKey.isDown || rightKey.isDown)) {
+            pressEnabled = true;
           }
+        }
+
+        function update() {
+          clearOldTiles();
+          generateNewTiles();
+          processUserInput();
         }
 
         function addRandomBlock() {
@@ -104,10 +146,11 @@
               }
             }
           }
-
-          var blockPosition = freeBlocks[parseInt(Math.random() * freeBlocks.length)];
-          var blockNumber = [2, 4][parseInt(Math.random() * 2)];
-          grid[blockPosition[0]][blockPosition[1]] = blockNumber;
+          if (freeBlocks.length > 0) {
+            var blockPosition = freeBlocks[parseInt(Math.random() * freeBlocks.length)];
+            var blockNumber = [2, 4][parseInt(Math.random() * 2)];
+            grid[blockPosition[0]][blockPosition[1]] = blockNumber;
+          }
         }
 
 
@@ -213,9 +256,6 @@
             }
             grid[i] = finalRow;
           }
-        }
-
-        function fadePictures () {
         }
     };
 
