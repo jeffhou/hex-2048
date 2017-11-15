@@ -20,8 +20,6 @@
     <script type="text/javascript">
     /*
       Task Board
-      BUG - New block generated after accepted user input even when tiles don't move.
-      BUG - When board is full, game still tries to generate new block and then crashes.
       TODO - Add in additional tier differentiators: size and color.
       TODO - Display instructions with new game.
       TODO - Display achievements when game ends.
@@ -115,6 +113,10 @@
           if (pressEnabled){
             if (upKey.isDown || downKey.isDown || leftKey.isDown || rightKey.isDown) {
               pressEnabled = false;
+              var oldGrid = [];
+              for (let i = 0; i < 4; i++) {
+                oldGrid.push(grid[i].slice());
+              }
               if (upKey.isDown) {
                 collapseUp();
               } else if (downKey.isDown) {
@@ -124,7 +126,17 @@
               } else if (rightKey.isDown) {
                 collapseRight();
               }
-              addRandomBlock();
+              var gridChanged = false;
+              for (var i = 0; i < 4; i++) {
+                for (var j = 0; j < 4; j++) {
+                  if (oldGrid[i][j] != grid[i][j]) {
+                    gridChanged = true;
+                  }
+                }
+              }
+              if (gridChanged) {
+                addRandomBlock();
+              }
             }
           } else if (!(upKey.isDown || downKey.isDown || leftKey.isDown || rightKey.isDown)) {
             pressEnabled = true;
