@@ -21,7 +21,6 @@
     /*
       Task Board
 
-      TODO - Display instructions with new game.
       TODO - Display achievements when game ends.
       TODO - Wrap up the canvas in nice landing page.
 
@@ -67,6 +66,8 @@
         }
 
         function setUpDisplay() {
+          gameDisplay = game.add.group();
+
           valueSizes = {2: 48, 4: 48, 8: 48, 16: 48, 32: 48, 64: 48, 128: 48, 256: 48, 512: 48, 1024: 32, 2048: 32, 4096: 32, 8192: 32, 16384: 32, 32768: 32};
           valueColors = {2: "fff", 4: "add", 8: "5bb", 16: "f99", 32: "dc8", 64: "be7", 128: "711", 256: "513", 512: "315", 1024: "117", 2048: "ff9", 4096: "eea", 8192: "ddc", 16384: "cce", 32768: "55f"};
           var graphics = game.add.graphics(0, 0);
@@ -78,11 +79,26 @@
             }
           }
           graphics.endFill();
+          gameDisplay.add(graphics)
         }
 
-        function setUpTimer() {
-          timer = game.time.create(false);
-          timer.start();
+        function setUpInstructions() {
+          instructionsDisplay = game.add.group();
+          var bar = game.add.graphics();
+          bar.beginFill(0x0, 0.7);
+          bar.lineStyle(10, 0xffffff, 0.5);
+          bar.drawRoundedRect(20, game.height / 2 - 150, game.width - 40, 300);
+          instructionsDisplay.add(bar);
+
+          var style = { font: "28px upheaval", fill: "#fff", boundsAlignH: "center", boundsAlignV: "middle", wordWrap: true, wordWrapWidth: game.width - 100 };
+          var text = game.add.text(0, 0, "HOW TO PLAY\n\nUse your arrow keys to move the tiles. When two tiles with the same number touch, they merge into one!", style);
+          text.setTextBounds(0, game.height / 2 - 125, game.width, 250);
+          instructionsDisplay.add(text);
+
+          style = { font: "18px upheaval", fill: "#fff", boundsAlignH: "center", textAlign: "center", wordWrap: true, wordWrapWidth: game.width - 100 };
+          text = game.add.text(0, 0, "Press an arrow key to continue...", style);
+          text.setTextBounds(0, game.height / 2 + 110, game.width, 250);
+          instructionsDisplay.add(text);
         }
 
         function create () {
@@ -90,7 +106,7 @@
           setUpTiles();
           setUpGrid();
           setUpDisplay();
-          //setUpTimer();
+          setUpInstructions();
         }
 
         function clearOldTiles() {
@@ -106,6 +122,7 @@
                 let text = game.add.text(BORDER_WIDTH, BORDER_WIDTH, grid[i][j], { font: valueSizes[grid[i][j]] + "px upheaval", fill: "#" + valueColors[grid[i][j]], boundsAlignH: "center", boundsAlignV: "middle"})
                 text.setTextBounds(BORDER_WIDTH + i * TILE_SIZE, BORDER_WIDTH + (3 - j) * TILE_SIZE, TILE_SIZE - 2 * BORDER_WIDTH, TILE_SIZE - 2 * BORDER_WIDTH);
                 tiles.push(text);
+                gameDisplay.add(text);
               }
             }
           }
@@ -114,6 +131,9 @@
         function processUserInput() {
           if (pressEnabled){
             if (upKey.isDown || downKey.isDown || leftKey.isDown || rightKey.isDown) {
+              if (instructionsDisplay.parent != null) {
+                instructionsDisplay.destroy();
+              }
               pressEnabled = false;
               var oldGrid = [];
               for (let i = 0; i < 4; i++) {
@@ -146,6 +166,7 @@
         }
 
         function update() {
+
           clearOldTiles();
           generateNewTiles();
           processUserInput();
