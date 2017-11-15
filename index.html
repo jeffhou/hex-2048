@@ -2,8 +2,15 @@
 <html>
     <head>
         <meta charset="UTF-8" />
-        <title>hello phaser!</title>
+        <title>2048</title>
         <script src="phaser.js"></script>
+        <link href='https://fonts.googleapis.com/css?family=Abel' rel='stylesheet'>
+        <style>
+          @font-face {
+            font-family: upheaval;
+            src: url(upheaval.otf);
+          }
+        </style>
     </head>
     <body>
 
@@ -15,12 +22,10 @@
         //  Although it will work fine with this tutorial, it's almost certainly not the most current version.
         //  Be sure to replace it with an updated version before you start experimenting with adding your own code.
 
-        var game = new Phaser.Game(800, 600, Phaser.AUTO, '', { preload: preload, create: create, update: update });
+        game = new Phaser.Game(522, 522, Phaser.AUTO, '', { preload: preload, create: create, update: update });
 
         function preload () {
-
             game.load.image('logo', 'phaser.png');
-
         }
 
         function create () {
@@ -28,16 +33,40 @@
           downKey = game.input.keyboard.addKey(Phaser.Keyboard.DOWN);
           leftKey = game.input.keyboard.addKey(Phaser.Keyboard.LEFT);
           rightKey = game.input.keyboard.addKey(Phaser.Keyboard.RIGHT);
-
-          var logo = game.add.sprite(game.world.centerX, game.world.centerY, 'logo');
-          logo.anchor.setTo(0.5, 0.5);
+          texts = [];
+          //var logo = game.add.sprite(game.world.centerX, game.world.centerY, 'logo');
+          //logo.anchor.setTo(0.5, 0.5);
           timer = game.time.create(false);
-          timer.start()
+          timer.start();
 
-          grid = [[0, 0, 0, 0], [0, 0, 0, 0], [0, 0, 0, 0], [0, 0, 0, 0]]
+          grid = [[0, 0, 0, 0], [0, 0, 0, 0], [0, 0, 0, 0], [0, 0, 0, 0]];
+          addRandomBlock();
+          addRandomBlock();
+
+          var graphics = game.add.graphics(0, 0);
+          graphics.beginFill(0x458b6d);
+          graphics.lineStyle(10, 0x396754, 1);
+          for (let i = 0; i < 4; i++) {
+            for (let j = 0; j < 4; j++) {
+              graphics.drawRect(5 + i * 128, 5 + j * 128, 128, 128);
+            }
+          }
+          graphics.endFill();
         }
 
         function update() {
+          while (texts.length > 0) {
+            texts.pop().destroy();
+          }
+          for (let i = 0; i < 4; i++) {
+            for (let j = 0; j < 4; j++) {
+              if (grid[i][j] != 0) {
+                let text = game.add.text(5, 5, grid[i][j], { font: "32px upheaval", fill: "#fff", boundsAlignH: "center", boundsAlignV: "middle"})
+                text.setTextBounds(5 + i * 128, 5 + (3 - j) * 128, 118, 118);
+                texts.push(text);
+              }
+            }
+          }
           if (timer.events.length == 0) {
             /* TODO: Add key locks so only after a key is down and then up
                will it be considered pressed. (Prevents duplicate key press
@@ -45,19 +74,23 @@
             if (upKey.isDown) {
               console.log("UP");
               collapseUp();
-              timer.add(1500, fadePictures, this);
+              addRandomBlock();
+              timer.add(150, fadePictures, this);
             } else if (downKey.isDown) {
               console.log("DOWN");
               collapseDown();
-              timer.add(1500, fadePictures, this);
+              addRandomBlock();
+              timer.add(150, fadePictures, this);
             } else if (leftKey.isDown) {
               console.log("LEFT");
               collapseLeft();
-              timer.add(1500, fadePictures, this);
+              addRandomBlock();
+              timer.add(150, fadePictures, this);
             } else if (rightKey.isDown) {
               console.log("RIGHT");
               collapseRight();
-              timer.add(1500, fadePictures, this);
+              addRandomBlock();
+              timer.add(150, fadePictures, this);
             }
           }
         }
@@ -71,7 +104,6 @@
               }
             }
           }
-          a = (Math.random() * freeBlocks.length)
 
           var blockPosition = freeBlocks[parseInt(Math.random() * freeBlocks.length)];
           var blockNumber = [2, 4][parseInt(Math.random() * 2)];
@@ -184,12 +216,6 @@
         }
 
         function fadePictures () {
-          console.log("~~~~");
-          addRandomBlock();
-          console.log(grid[0].toString());
-          console.log(grid[1].toString());
-          console.log(grid[2].toString());
-          console.log(grid[3].toString());
         }
     };
 
