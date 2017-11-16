@@ -21,7 +21,6 @@
     /*
       Task Board
 
-      TODO - Display achievements when game ends.
       TODO - Wrap up the canvas in nice landing page.
 
       Brainstorm Board
@@ -47,6 +46,7 @@
           downKey = game.input.keyboard.addKey(Phaser.Keyboard.DOWN);
           leftKey = game.input.keyboard.addKey(Phaser.Keyboard.LEFT);
           rightKey = game.input.keyboard.addKey(Phaser.Keyboard.RIGHT);
+          enterKey = game.input.keyboard.addKey(Phaser.Keyboard.ENTER);
           pressEnabled = true;
         }
 
@@ -107,6 +107,7 @@
           setUpGrid();
           setUpDisplay();
           setUpInstructions();
+          gameEnded = false;
         }
 
         function clearOldTiles() {
@@ -128,45 +129,95 @@
           }
         }
 
-        function processUserInput() {
-          if (pressEnabled){
-            if (upKey.isDown || downKey.isDown || leftKey.isDown || rightKey.isDown) {
-              if (instructionsDisplay.parent != null) {
-                instructionsDisplay.destroy();
-              }
-              pressEnabled = false;
-              var oldGrid = [];
-              for (let i = 0; i < 4; i++) {
-                oldGrid.push(grid[i].slice());
-              }
-              if (upKey.isDown) {
-                collapseUp();
-              } else if (downKey.isDown) {
-                collapseDown();
-              } else if (leftKey.isDown) {
-                collapseLeft();
-              } else if (rightKey.isDown) {
-                collapseRight();
-              }
-              var gridChanged = false;
-              for (var i = 0; i < 4; i++) {
-                for (var j = 0; j < 4; j++) {
-                  if (oldGrid[i][j] != grid[i][j]) {
-                    gridChanged = true;
-                  }
-                }
-              }
-              if (gridChanged) {
-                addRandomBlock();
+        function unableToMove() {
+          for (let i = 0; i < 4; i++) {
+            if (grid[i].indexOf(0) != -1) {
+              // grid isn't filled
+              return false;
+            }
+            for (let j = 0; j < 3; j++) {
+              if (grid[i][j] == grid[i][j + 1] || grid[j][i] == grid[j + 1][i]) {
+                // grid can move vertically or horizontally
+                return false;
               }
             }
-          } else if (!(upKey.isDown || downKey.isDown || leftKey.isDown || rightKey.isDown)) {
-            pressEnabled = true;
+          }
+          return true;
+        }
+
+        function displayEnding() {
+          instructionsDisplay = game.add.group();
+          var bar = game.add.graphics();
+          bar.beginFill(0x222222, 1);
+          bar.lineStyle(5, 0xffffff, 1);
+          bar.drawRoundedRect(20, game.height / 2 - 150, game.width - 40, 320);
+          instructionsDisplay.add(bar);
+
+          var style = { font: "28px upheaval", fill: "#fff", boundsAlignH: "center", boundsAlignV: "middle", wordWrap: true, wordWrapWidth: game.width - 100 };
+          var text = game.add.text(0, 0, "GAME OVER\n\nNo more valid moves!", style);
+          text.setTextBounds(0, game.height / 2 - 145, game.width, 250);
+          instructionsDisplay.add(text);
+
+          style = { font: "18px upheaval", fill: "#fff", boundsAlignH: "center", textAlign: "center", wordWrap: true, wordWrapWidth: game.width - 100 };
+          text = game.add.text(0, 0, "Press enter to try again...", style);
+          text.setTextBounds(0, game.height / 2 + 130, game.width, 250);
+          instructionsDisplay.add(text);
+        }
+
+        function processUserInput() {
+          if (!gameEnded) {
+            if (pressEnabled){
+              if (upKey.isDown || downKey.isDown || leftKey.isDown || rightKey.isDown) {
+                if (instructionsDisplay.parent != null) {
+                  instructionsDisplay.destroy(true);
+                }
+                pressEnabled = false;
+                var oldGrid = [];
+                for (let i = 0; i < 4; i++) {
+                  oldGrid.push(grid[i].slice());
+                }
+                if (upKey.isDown) {
+                  collapseUp();
+                } else if (downKey.isDown) {
+                  collapseDown();
+                } else if (leftKey.isDown) {
+                  collapseLeft();
+                } else if (rightKey.isDown) {
+                  collapseRight();
+                }
+                var gridChanged = false;
+                for (var i = 0; i < 4; i++) {
+                  for (var j = 0; j < 4; j++) {
+                    if (oldGrid[i][j] != grid[i][j]) {
+                      gridChanged = true;
+                    }
+                  }
+                }
+                if (gridChanged) {
+                  addRandomBlock();
+                }
+                if (unableToMove()) {
+                  gameEnded = true;
+                }
+                // check to see if the whole grid is filled up and then update
+              }
+            } else if (!(upKey.isDown || downKey.isDown || leftKey.isDown || rightKey.isDown)) {
+              pressEnabled = true;
+            }
+          } else {
+            displayEnding();
+            if (enterKey.isDown) {
+              if (instructionsDisplay.parent != null) {
+                instructionsDisplay.destroy(true);
+              }
+              setUpGrid();
+              gameEnded = false;
+              game.world.bringToTop(gameDisplay);
+            }
           }
         }
 
         function update() {
-
           clearOldTiles();
           generateNewTiles();
           processUserInput();
