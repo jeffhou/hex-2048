@@ -7,7 +7,29 @@
         <link href='https://fonts.googleapis.com/css?family=Abel' rel='stylesheet'>
         <style>
           body {
-            background-color: black;
+            background-color: beige;
+          }
+          .game-container {
+            display: flex;
+            align-items: center;
+            padding-top: 100px;
+            flex-direction: column;
+            width: 585px;
+            margin: auto;
+          }
+          .game-title {
+            font-size: 64px;
+            display: flex;
+            font-family: upheaval;
+            margin-bottom: 20px;
+          }
+          .game-credit {
+            font-size: 24px;
+            display: flex;
+            font-family: upheaval;
+            margin: 10px;
+            align-self: flex-end;
+            color: #5bb;
           }
           @font-face {
             font-family: upheaval;
@@ -16,15 +38,26 @@
         </style>
     </head>
     <body>
-
+      <div class="game-container">
+    <div class="game-title">
+      2048
+    </div>
+        <div id="game-canvas" style="align-items: center">
+        </div>
+        <div class="game-credit">
+          Made by Jeff Hou
+        </div>
+      </div>
     <script type="text/javascript">
     /*
       Task Board
-
-      TODO - Wrap up the canvas in nice landing page.
-
-      Brainstorm Board
+      TODO - Refactor.
       TODO - Add motion.
+      TODO - Add animation.
+      TODO - Add personalizations for color / pictures / etc.
+      
+      Brainstorm Board
+      TODO - Telemetry
     */
     const TILE_SIZE = 128;
     const BORDER_WIDTH = 5;
@@ -35,7 +68,7 @@
         //  Although it will work fine with this tutorial, it's almost certainly not the most current version.
         //  Be sure to replace it with an updated version before you start experimenting with adding your own code.
 
-        game = new Phaser.Game(CANVAS_SIZE, CANVAS_SIZE, Phaser.AUTO, '', { preload: preload, create: create, update: update });
+        game = new Phaser.Game(CANVAS_SIZE, CANVAS_SIZE, Phaser.AUTO, 'game-canvas', { preload: preload, create: create, update: update });
 
         function preload () {
             game.load.image('logo', 'phaser.png');
@@ -346,6 +379,5 @@
     };
 
     </script>
-
     </body>
 </html>
