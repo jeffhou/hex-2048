@@ -177,6 +177,16 @@
           for (let i = 0; i < 3; i++) {
             this.grid[4].push(new HexBlock());
           }
+
+          /*
+          let power = 2;
+          for (let j = 0; j < 5; j++) {
+            for (let i = 0; i < this.grid[j].length; i++) {
+              this.grid[j][i].value = power;
+              power *= 2;
+            }
+          }
+          */
         }
 
         connectBlocks() {
@@ -255,6 +265,7 @@
         keys['a'] = game.input.keyboard.addKey(Phaser.Keyboard.A);
         keys['s'] = game.input.keyboard.addKey(Phaser.Keyboard.S);
         keys['d'] = game.input.keyboard.addKey(Phaser.Keyboard.D);
+        enterKey = game.input.keyboard.addKey(Phaser.Keyboard.ENTER);
         pressEnabled = true;
       }
 
@@ -274,12 +285,14 @@
 
       function setUpDisplay() {
         gameDisplay = game.add.group();
-        valueSizes = {2: 48, 4: 48, 8: 48, 16: 48, 32: 48, 64: 48, 128: 48, 256: 48, 512: 48, 1024: 32, 2048: 32, 4096: 32, 8192: 32, 16384: 32, 32768: 32};
-        valueColors = {2: "fff", 4: "add", 8: "5bb", 16: "f99", 32: "dc8", 64: "be7", 128: "711", 256: "513", 512: "315", 1024: "117", 2048: "ff9", 4096: "eea", 8192: "ddc", 16384: "cce", 32768: "55f"};
+        game.stage.backgroundColor = "#000000";
+        valueSizes = {2: 48, 4: 48, 8: 48, 16: 48, 32: 48, 64: 48, 128: 48, 256: 40, 512: 40, 1024: 32, 2048: 32, 4096: 32, 8192: 32, 16384: 32, 32768: 32};
+        valueColors = {2: "fff", 4: "add", 8: "5bb", 16: "ed717c", 32: "db6fdb", 64: "f99", 128: "9f9", 256: "10c5ee", 512: "c5ee10", 1024: "1eb", 2048: "ff9", 4096: "eea", 8192: "ddc", 16384: "cce", 32768: "55f"};
+        //valueColors = {2: "fff", 4: "add", 8: "5bb", 16: "f99", 32: "dc8", 64: "be7", 128: "711", 256: "513", 512: "315", 1024: "117", 2048: "ff9", 4096: "eea", 8192: "ddc", 16384: "cce", 32768: "55f"};
         starterPositions = [[124, 192], [124, 300], [124, 408], [214, 462], [304, 516]];
 
-        var graphics = game.add.graphics(0, 0);
-        gameDisplay.add(graphics);
+        hexgrid = game.add.sprite(0, 0, 'hexgrid');
+        gameDisplay.add(hexgrid);
 
       }
 
@@ -303,11 +316,9 @@
       }
 
       function create () {
-        hexgrid = game.add.sprite(0, 0, 'hexgrid');
         setUpKeys();
         setUpTiles();
         setUpGrid();
-
         setUpDisplay();
         setUpInstructions();
         gameEnded = false;
@@ -318,39 +329,8 @@
           tiles.pop().destroy();
         }
       }
-//56x88
+
       function generateNewTiles() {
-        /*
-        let text = game.add.text(124, 192, 2, { font: valueSizes[2] + "px upheaval", fill: "#" + valueColors[2], boundsAlignH: "center", boundsAlignV: "middle"})
-        text.setTextBounds(-50, -50, 100, 100);
-        tiles.push(text);
-        gameDisplay.add(text);
-
-        text = game.add.text(124, 300, 2, { font: valueSizes[2] + "px upheaval", fill: "#" + valueColors[2], boundsAlignH: "center", boundsAlignV: "middle"})
-        text.setTextBounds(-50, -50, 100, 100);
-        tiles.push(text);
-        gameDisplay.add(text);
-
-        text = game.add.text(124, 408, 2, { font: valueSizes[2] + "px upheaval", fill: "#" + valueColors[2], boundsAlignH: "center", boundsAlignV: "middle"})
-        text.setTextBounds(-50, -50, 100, 100);
-        tiles.push(text);
-        gameDisplay.add(text);
-
-        text = game.add.text(214, 462, 2, { font: valueSizes[2] + "px upheaval", fill: "#" + valueColors[2], boundsAlignH: "center", boundsAlignV: "middle"})
-        text.setTextBounds(-50, -50, 100, 100);
-        tiles.push(text);
-        gameDisplay.add(text);
-
-        text = game.add.text(304, 516, 2, { font: valueSizes[2] + "px upheaval", fill: "#" + valueColors[2], boundsAlignH: "center", boundsAlignV: "middle"})
-        text.setTextBounds(-50, -50, 100, 100);
-        tiles.push(text);
-        gameDisplay.add(text);
-
-        text = game.add.text(214, 138, 4, { font: valueSizes[2] + "px upheaval", fill: "#" + valueColors[2], boundsAlignH: "center", boundsAlignV: "middle"})
-        text.setTextBounds(-50, -50, 100, 100);
-        tiles.push(text);
-        gameDisplay.add(text);
-        */
         for (let i = 0; i < 5; i++) {
           for (let j = 0; j < grid.grid[i].length; j++) {
             if (grid.grid[i][j].value != null) {
@@ -367,10 +347,11 @@
       function unableToMove() {
         for (let i = 0; i < 5; i++) {
           for (let j = 0; j < grid.grid[i].length; j++) {
-            if (grid.grid[i][j].blocks["e"] == null || grid.grid[i][j].blocks["e"].value == null || grid.grid[i][j].blocks["e"].value == grid.grid[i][j].value
-              || grid.grid[i][j].blocks["s"] == null || grid.grid[i][j].blocks["s"].value == null || grid.grid[i][j].blocks["s"].value == grid.grid[i][j].value
-              || grid.grid[i][j].blocks["d"] == null || grid.grid[i][j].blocks["d"].value == null || grid.grid[i][j].blocks["d"].value == grid.grid[i][j].value) {
-                return false;
+            if (grid.grid[i][j].blocks["e"] != null && (grid.grid[i][j].blocks["e"].value == null || grid.grid[i][j].blocks["e"].value == grid.grid[i][j].value)
+                || grid.grid[i][j].blocks["s"] != null && (grid.grid[i][j].blocks["s"].value == null || grid.grid[i][j].blocks["s"].value == grid.grid[i][j].value)
+                || grid.grid[i][j].blocks["d"] != null && (grid.grid[i][j].blocks["d"].value == null || grid.grid[i][j].blocks["d"].value == grid.grid[i][j].value)
+              ) {
+                  return false;
             }
           }
         }
@@ -412,7 +393,6 @@
               if (unableToMove()) {
                 gameEnded = true;
               }
-              // check to see if the whole grid is filled up and then update
             }
           } else if (!keyDown()) {
             pressEnabled = true;
