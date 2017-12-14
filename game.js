@@ -31,6 +31,37 @@ window.onload = function() {
       this.setUpLandingPoints();
     }
 
+    serialize () {
+      var str = "";
+      for (let i = 0; i < 5; i++) {
+        for (let j = 0; j < this.grid[i].length; j++) {
+          str += " " + this.grid[i][j].value;
+        }
+      }
+      return str;
+    }
+
+    loadFromMemory () {
+      if ("grid" in localStorage) {
+        this.loadFromString(localStorage["grid"]);
+      }
+    }
+
+    loadFromString (string) {
+      var data = string.split(" ").reverse();
+      data.pop();
+      for (let i = 0; i < 5; i++) {
+        for (let j = 0; j < this.grid[i].length; j++) {
+          let next = data.pop();
+          if (next == "null") {
+            this.grid[i][j].value = null;
+          } else {
+            this.grid[i][j].value = parseInt(next);
+          }
+        }
+      }
+    }
+
     toString () {
       var str = "";
       for (let i = 0; i < 5; i++) {
@@ -138,7 +169,6 @@ window.onload = function() {
       for (let i = 0; i < 3; i++) {
         this.grid[4].push(new HexBlock());
       }
-
     }
 
     connectBlocks() {
@@ -232,8 +262,12 @@ window.onload = function() {
 
   function setUpGrid() {
     grid = new HexGrid();
-    addRandomBlock();
-    addRandomBlock();
+    if ("grid" in localStorage) {
+      grid.loadFromMemory();
+    } else {
+      addRandomBlock();
+      addRandomBlock();
+    }
   }
 
   function setUpDisplay() {
@@ -278,7 +312,9 @@ window.onload = function() {
     setUpTiles();
     setUpGrid();
     setUpDisplay();
-    setUpInstructions();
+    if (!("grid" in localStorage)) {
+      setUpInstructions();
+    }
     gameEnded = false;
   }
 
@@ -339,7 +375,7 @@ window.onload = function() {
     if (!gameEnded) {
       if (pressEnabled){
         if (keyDown()) {
-          if (instructionsDisplay.parent != null) {
+          if (typeof instructionsDisplay != "undefined" && instructionsDisplay.parent != null) {
             instructionsDisplay.destroy(true);
           }
           pressEnabled = false;
@@ -351,6 +387,8 @@ window.onload = function() {
           }
           if (unableToMove()) {
             gameEnded = true;
+          } else {
+            localStorage.setItem("grid", "" + grid.serialize())
           }
         }
       } else if (!keyDown()) {
@@ -359,7 +397,7 @@ window.onload = function() {
     } else {
       displayEnding();
       if (enterKey.isDown) {
-        if (instructionsDisplay.parent != null) {
+        if (typeof instructionsDisplay != "undefined" && instructionsDisplay.parent != null) {
           instructionsDisplay.destroy(true);
         }
         setUpGrid();
