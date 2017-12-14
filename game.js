@@ -1,7 +1,6 @@
 /*
 Features
   TODO - Motion
-  TODO - Save State
   TODO - Global Scoreboard
   TODO - Unit Tests
   TODO - Telemetry
@@ -286,6 +285,7 @@ window.onload = function() {
   function setUpInstructions() {
     instructionsDisplay = game.add.group();
     var bar = game.add.graphics();
+
     bar.beginFill(0x222222, 0.95);
     bar.lineStyle(5, 0x3966cb, 1);
     bar.drawRoundedRect(20, 50, game.width - 40, 480);
@@ -316,7 +316,46 @@ window.onload = function() {
       setUpInstructions();
     }
     gameEnded = false;
+    game.input.onTap.add(onTap, this);
+
   }
+
+  function moveTowards (direction) {
+    console.log("moveTowards " + direction)
+    var oldGrid = grid.toString();
+    grid.shiftTowards(direction);
+    if (oldGrid != grid.toString()) {
+      addRandomBlock();
+      addRandomBlock();
+    }
+    if (unableToMove()) {
+      gameEnded = true;
+    } else {
+      localStorage.setItem("grid", "" + grid.serialize())
+    }
+  }
+
+  function onTap (pointer, doubletap) {
+    if (typeof instructionsDisplay != "undefined" && instructionsDisplay.parent != null) {
+      instructionsDisplay.destroy(true);
+    } else {
+      if (pointer.x > 225 && pointer.x < 375 && pointer.y > 15 && pointer.y < 145) {
+        moveTowards("w");
+      } if (pointer.x > 45 && pointer.x < 195 && pointer.y > 123 && pointer.y < 253) {
+        moveTowards("q");
+      } if (pointer.x > 45 && pointer.x < 195 && pointer.y > 339 && pointer.y < 469) {
+        moveTowards("a");
+      } if (pointer.x > 405 && pointer.x < 555 && pointer.y > 123 && pointer.y < 253) {
+        moveTowards("e");
+      } if (pointer.x > 405 && pointer.x < 555 && pointer.y > 339 && pointer.y < 469) {
+        moveTowards("d");
+      } if (pointer.x > 225 && pointer.x < 375 && pointer.y > 447 && pointer.y < 577) {
+        moveTowards("s");
+      }
+    }
+  }
+
+
 
   function clearOldTiles() {
     while (tiles.length > 0) {
