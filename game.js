@@ -445,7 +445,7 @@ window.onload = function() {
         if (typeof instructionsDisplay != "undefined" && instructionsDisplay.parent != null) {
           instructionsDisplay.destroy(true);
         }
-        
+        localStorage.clear();
         setUpGrid();
         gameEnded = false;
         game.world.bringToTop(gameDisplay);
