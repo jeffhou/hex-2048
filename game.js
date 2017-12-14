@@ -10,6 +10,7 @@ opposite_directions = {'q': 'd', 'w': 's', 'e': 'a', 'a': 'e', 's': 'w', 'd': 'q
 adjacent_directions = {'q': ['a', 'w'], 'w': ['q', 'e'], 'e': ['w', 'd'], 'a': ['s', 'q'], 's': ['a', 'd'], 'd': ['e', 's']};
 
 const CANVAS_SIZE = 600;
+const SHIFT_X = 45, SHIFT_Y = 30;
 window.onload = function() {
   class HexBlock {
     constructor() {
@@ -168,6 +169,7 @@ window.onload = function() {
       for (let i = 0; i < 3; i++) {
         this.grid[4].push(new HexBlock());
       }
+
     }
 
     connectBlocks() {
@@ -218,10 +220,10 @@ window.onload = function() {
   //  Note that this html file is set to pull down Phaser 2.5.0 from the JS Delivr CDN.
   //  Although it will work fine with this tutorial, it's almost certainly not the most current version.
   //  Be sure to replace it with an updated version before you start experimenting with adding your own code.
-  game = new Phaser.Game(CANVAS_SIZE, CANVAS_SIZE, Phaser.AUTO, 'game-canvas', { preload: preload, create: create, update: update });
+  game = new Phaser.Game(CANVAS_SIZE + 2 * SHIFT_X, CANVAS_SIZE + 2 * SHIFT_Y, Phaser.AUTO, 'game-canvas', { preload: preload, create: create, update: update });
 
   function preload () {
-      game.load.image('hexgrid', 'hexgrid.png');
+      game.load.image('hexgrid', 'hexgrid2.png');
       game.load.image('movement_instructions', 'movement_example.png');
       game.load.image('keys', 'keys.png');
   }
@@ -276,6 +278,10 @@ window.onload = function() {
     valueColors = {2: "fff", 4: "add", 8: "5bb", 16: "ed717c", 32: "db6fdb", 64: "f99", 128: "9f9", 256: "10c5ee", 512: "c5ee10", 1024: "1eb", 2048: "ff9", 4096: "eea", 8192: "ddc", 16384: "cce", 32768: "55f"};
     //valueColors = {2: "fff", 4: "add", 8: "5bb", 16: "f99", 32: "dc8", 64: "be7", 128: "711", 256: "513", 512: "315", 1024: "117", 2048: "ff9", 4096: "eea", 8192: "ddc", 16384: "cce", 32768: "55f"};
     starterPositions = [[124, 192], [124, 300], [124, 408], [214, 462], [304, 516]];
+    for (let i = 0; i < starterPositions.length; i++) {
+      starterPositions[i][0] += SHIFT_X;
+      starterPositions[i][1] += SHIFT_Y;
+    }
 
     hexgrid = game.add.sprite(0, 0, 'hexgrid');
     gameDisplay.add(hexgrid);
@@ -288,21 +294,21 @@ window.onload = function() {
 
     bar.beginFill(0x222222, 0.95);
     bar.lineStyle(5, 0x3966cb, 1);
-    bar.drawRoundedRect(20, 50, game.width - 40, 480);
+    bar.drawRoundedRect(SHIFT_X + 20, SHIFT_Y + 50, game.width - 40 - 2 * SHIFT_X, 480);
     instructionsDisplay.add(bar);
 
     var style = { font: "28px upheaval", fill: "#fff", boundsAlignH: "left", boundsAlignV: "top", wordWrap: true, wordWrapWidth: game.width - 50 };
-    var text = game.add.text(0, 0, "HOW TO PLAY\n\nUse                   keys to move the\n\ntiles. When two tiles with the same number touch, they merge into one!", style);
+    var text = game.add.text(SHIFT_X, SHIFT_Y, "HOW TO PLAY\n\nUse                   keys to move the\n\ntiles. When two tiles with the same number touch, they merge into one!", style);
     //[Q], [W], [E], [A], [S], [D] keys
     text.setTextBounds(50, 70, game.width, 200);
     instructionsDisplay.add(text);
 
     style = { font: "18px upheaval", fill: "#fff", boundsAlignH: "center", textAlign: "center", wordWrap: true, wordWrapWidth: game.width - 100 };
-    text = game.add.text(0, 0, "Press a valid movement key to continue...", style);
+    text = game.add.text(SHIFT_X, SHIFT_Y, "Press a valid movement key to continue...", style);
     text.setTextBounds(0, game.height / 2 + 200, game.width, 250);
     instructionsDisplay.add(text);
-    var keys = game.add.sprite(115, 120, 'keys');
-    var movement_instructions = game.add.sprite(game.width / 2 - 100, 260, 'movement_instructions');
+    var keys = game.add.sprite(115 + SHIFT_X, SHIFT_Y + 120, 'keys');
+    var movement_instructions = game.add.sprite(game.width / 2 - 100 + SHIFT_X, SHIFT_Y + 260, 'movement_instructions');
     instructionsDisplay.add(movement_instructions);
     instructionsDisplay.add(keys);
   }
@@ -339,18 +345,18 @@ window.onload = function() {
     if (typeof instructionsDisplay != "undefined" && instructionsDisplay.parent != null) {
       instructionsDisplay.destroy(true);
     } else {
-      if (pointer.x > 225 && pointer.x < 375 && pointer.y > 15 && pointer.y < 145) {
-        moveTowards("w");
-      } if (pointer.x > 45 && pointer.x < 195 && pointer.y > 123 && pointer.y < 253) {
+      if (pointer.x < 220 && pointer.y < 330) {
         moveTowards("q");
-      } if (pointer.x > 45 && pointer.x < 195 && pointer.y > 339 && pointer.y < 469) {
-        moveTowards("a");
-      } if (pointer.x > 405 && pointer.x < 555 && pointer.y > 123 && pointer.y < 253) {
+      } if (pointer.x > 220 && pointer.x < 470 && pointer.y < 165) {
+        moveTowards("w");
+      } if (pointer.x > 470 && pointer.y < 330) {
         moveTowards("e");
-      } if (pointer.x > 405 && pointer.x < 555 && pointer.y > 339 && pointer.y < 469) {
-        moveTowards("d");
-      } if (pointer.x > 225 && pointer.x < 375 && pointer.y > 447 && pointer.y < 577) {
+      } if (pointer.x < 220 && pointer.y > 330) {
+        moveTowards("a");
+      } if (pointer.x > 220 && pointer.x < 470 && pointer.y > 495) {
         moveTowards("s");
+      } if (pointer.x > 470 && pointer.y > 330) {
+        moveTowards("d");
       }
     }
   }
@@ -439,6 +445,7 @@ window.onload = function() {
         if (typeof instructionsDisplay != "undefined" && instructionsDisplay.parent != null) {
           instructionsDisplay.destroy(true);
         }
+        
         setUpGrid();
         gameEnded = false;
         game.world.bringToTop(gameDisplay);
