@@ -10,7 +10,7 @@ opposite_directions = {'q': 'd', 'w': 's', 'e': 'a', 'a': 'e', 's': 'w', 'd': 'q
 adjacent_directions = {'q': ['a', 'w'], 'w': ['q', 'e'], 'e': ['w', 'd'], 'a': ['s', 'q'], 's': ['a', 'd'], 'd': ['e', 's']};
 
 const CANVAS_SIZE = 600;
-const SHIFT_X = 45, SHIFT_Y = 30;
+const SHIFT_X = 45, SHIFT_Y = 60;
 window.onload = function() {
   class HexBlock {
     constructor() {
@@ -283,7 +283,7 @@ window.onload = function() {
       starterPositions[i][1] += SHIFT_Y;
     }
 
-    hexgrid = game.add.sprite(0, 0, 'hexgrid');
+    hexgrid = game.add.sprite(0, 30, 'hexgrid');
     gameDisplay.add(hexgrid);
 
   }
@@ -323,7 +323,7 @@ window.onload = function() {
     }
     gameEnded = false;
     game.input.onTap.add(onTap, this);
-
+    game.stage.backgroundColor = "#f5f5dc";
   }
 
   function moveTowards (direction) {
@@ -345,17 +345,17 @@ window.onload = function() {
     if (typeof instructionsDisplay != "undefined" && instructionsDisplay.parent != null) {
       instructionsDisplay.destroy(true);
     } else {
-      if (pointer.x < 220 && pointer.y < 330) {
+      if (pointer.x < 220 && pointer.y < 370) {
         moveTowards("q");
-      } if (pointer.x > 220 && pointer.x < 470 && pointer.y < 165) {
+      } else if (pointer.x > 220 && pointer.x < 470 && pointer.y < 285) {
         moveTowards("w");
-      } if (pointer.x > 470 && pointer.y < 330) {
+      } else if (pointer.x > 470 && pointer.y < 370) {
         moveTowards("e");
-      } if (pointer.x < 220 && pointer.y > 330) {
+      } else if (pointer.x < 220 && pointer.y > 370) {
         moveTowards("a");
-      } if (pointer.x > 220 && pointer.x < 470 && pointer.y > 495) {
+      } else if (pointer.x > 220 && pointer.x < 470 && pointer.y > 435) {
         moveTowards("s");
-      } if (pointer.x > 470 && pointer.y > 330) {
+      } else if (pointer.x > 470 && pointer.y > 370) {
         moveTowards("d");
       }
     }
