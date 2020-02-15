@@ -1,16 +1,11 @@
-/*
-Features
-  TODO - Motion
-  TODO - Global Scoreboard
-  TODO - Unit Tests
-  TODO - Telemetry
-*/
-directions = ['q', 'w', 'e', 'a', 's', 'd'];
-opposite_directions = {'q': 'd', 'w': 's', 'e': 'a', 'a': 'e', 's': 'w', 'd': 'q'};
-adjacent_directions = {'q': ['a', 'w'], 'w': ['q', 'e'], 'e': ['w', 'd'], 'a': ['s', 'q'], 's': ['a', 'd'], 'd': ['e', 's']};
+const directions = ['q', 'w', 'e', 'a', 's', 'd'];
+const opposite_directions = {'q': 'd', 'w': 's', 'e': 'a', 'a': 'e', 's': 'w', 'd': 'q'};
+const adjacent_directions = {'q': ['a', 'w'], 'w': ['q', 'e'], 'e': ['w', 'd'], 'a': ['s', 'q'], 's': ['a', 'd'], 'd': ['e', 's']};
+let endingModalDisplay;
 
 const CANVAS_SIZE = 600;
 const SHIFT_X = 45, SHIFT_Y = 60;
+
 window.onload = function() {
   class HexBlock {
     constructor() {
@@ -217,15 +212,12 @@ window.onload = function() {
       this.landing_points['d'] = [this.grid[2][4], this.grid[3][3], this.grid[4][0], this.grid[4][1], this.grid[4][2]];
     }
   }
-  //  Note that this html file is set to pull down Phaser 2.5.0 from the JS Delivr CDN.
-  //  Although it will work fine with this tutorial, it's almost certainly not the most current version.
-  //  Be sure to replace it with an updated version before you start experimenting with adding your own code.
-  game = new Phaser.Game(CANVAS_SIZE + 2 * SHIFT_X, CANVAS_SIZE + 2 * SHIFT_Y, Phaser.AUTO, 'game-canvas', { preload: preload, create: create, update: update });
+  game = new Phaser.Game(CANVAS_SIZE + 2 * SHIFT_X, CANVAS_SIZE + 2 * SHIFT_Y + 100, Phaser.AUTO, 'game-canvas', { preload: preload, create: create, update: update });
 
   function preload () {
-      game.load.image('hexgrid', 'hexgrid2.png');
+      game.load.image('hexgridSprite', 'hexgrid2.png');
       game.load.image('movement_instructions', 'movement_example.png');
-      game.load.image('keys', 'keys.png');
+      game.load.image('movementKeysSprite', 'keys.png');
   }
 
   function keyDown() {
@@ -274,43 +266,82 @@ window.onload = function() {
   function setUpDisplay() {
     gameDisplay = game.add.group();
     game.stage.backgroundColor = "#000000";
-    valueSizes = {2: 48, 4: 48, 8: 48, 16: 48, 32: 48, 64: 48, 128: 48, 256: 40, 512: 40, 1024: 32, 2048: 32, 4096: 32, 8192: 32, 16384: 32, 32768: 32};
-    valueColors = {2: "fff", 4: "add", 8: "5bb", 16: "ed717c", 32: "db6fdb", 64: "f99", 128: "9f9", 256: "10c5ee", 512: "c5ee10", 1024: "1eb", 2048: "ff9", 4096: "eea", 8192: "ddc", 16384: "cce", 32768: "55f"};
-    //valueColors = {2: "fff", 4: "add", 8: "5bb", 16: "f99", 32: "dc8", 64: "be7", 128: "711", 256: "513", 512: "315", 1024: "117", 2048: "ff9", 4096: "eea", 8192: "ddc", 16384: "cce", 32768: "55f"};
+    valueSizes = {
+      2: 48,
+      4: 48,
+      8: 48,
+      16: 48,
+      32: 48,
+      64: 48,
+      128: 48,
+      256: 40,
+      512: 40,
+      1024: 32,
+      2048: 32,
+      4096: 32,
+      8192: 32,
+      16384: 32,
+      32768: 32,
+      65536: 32,
+      131072: 28,
+      262144: 28,
+      524288: 28,
+      1048576: 24,
+    };
+    valueColors = {
+      2: "fff",
+      4: "add",
+      8: "5bb",
+      16: "ed717c",
+      32: "db6fdb",
+      64: "f99",
+      128: "9f9",
+      256: "10c5ee",
+      512: "c5ee10",
+      1024: "1eb",
+      2048: "ff9",
+      4096: "eea",
+      8192: "ddc",
+      16384: "cce",
+      32768: "55f",
+      65536: 'fff',
+      131072: 'fff',
+      262144: 'fff',
+      524288: 'fff',
+      1048576: 'fff',
+    };
     starterPositions = [[124, 192], [124, 300], [124, 408], [214, 462], [304, 516]];
     for (let i = 0; i < starterPositions.length; i++) {
       starterPositions[i][0] += SHIFT_X;
       starterPositions[i][1] += SHIFT_Y;
     }
 
-    hexgrid = game.add.sprite(0, 30, 'hexgrid');
-    gameDisplay.add(hexgrid);
-
+    const hexgridSprite = game.add.sprite(0, 30 + 100, 'hexgridSprite');
+    gameDisplay.add(hexgridSprite);
   }
 
-  function setUpInstructions() {
-    instructionsDisplay = game.add.group();
-    var bar = game.add.graphics();
+  function displayInstructionsModal(initialRender) {
+    if (this.displayingEnding || initialRender) {
+      if (endingModalDisplay) endingModalDisplay.destroy();
+      instructionsDisplay = game.add.group();
+      var bar = game.add.graphics();
 
-    bar.beginFill(0x222222, 0.95);
-    bar.lineStyle(5, 0x3966cb, 1);
-    bar.drawRoundedRect(SHIFT_X + 20, SHIFT_Y + 50, game.width - 40 - 2 * SHIFT_X, 480);
-    instructionsDisplay.add(bar);
+      bar.beginFill(0x222222, 0.95);
+      bar.lineStyle(5, 0x3966cb, 1);
+      bar.drawRoundedRect(SHIFT_X + 20, 0, game.width - 40 - 2 * SHIFT_X, 100);
+      instructionsDisplay.add(bar);
 
-    var style = { font: "28px upheaval", fill: "#fff", boundsAlignH: "left", boundsAlignV: "top", wordWrap: true, wordWrapWidth: game.width - 50 };
-    var text = game.add.text(SHIFT_X, SHIFT_Y, "HOW TO PLAY\n\nUse                   keys to move the\n\ntiles. When two tiles with the same number touch, they merge into one!", style);
-    //[Q], [W], [E], [A], [S], [D] keys
-    text.setTextBounds(50, 70, game.width, 200);
-    instructionsDisplay.add(text);
+      var style = { font: "28px upheaval", fill: "#fff", boundsAlignH: "left", boundsAlignV: "top", wordWrap: true, wordWrapWidth: game.width - 100 };
+      var text = game.add.text(SHIFT_X, SHIFT_Y,
+        'Use the                  keys to shift tiles.\n\n', style);
+      text.setTextBounds(40, -26, game.width, 160);
+      instructionsDisplay.add(text);
 
-    style = { font: "18px upheaval", fill: "#fff", boundsAlignH: "center", textAlign: "center", wordWrap: true, wordWrapWidth: game.width - 100 };
-    text = game.add.text(SHIFT_X, SHIFT_Y, "Press a valid movement key to continue...", style);
-    text.setTextBounds(0, game.height / 2 + 200, game.width, 250);
-    instructionsDisplay.add(text);
-    var keys = game.add.sprite(115 + SHIFT_X, SHIFT_Y + 120, 'keys');
-    var movement_instructions = game.add.sprite(game.width / 2 - 100 + SHIFT_X, SHIFT_Y + 260, 'movement_instructions');
-    instructionsDisplay.add(movement_instructions);
-    instructionsDisplay.add(keys);
+      style = { font: "18px upheaval", fill: "#fff", boundsAlignH: "center", textAlign: "center", wordWrap: true, wordWrapWidth: game.width - 100 };
+      const movementKeysSprite = game.add.sprite(202, 18, 'movementKeysSprite');
+      instructionsDisplay.add(movementKeysSprite);
+      this.displayingEnding = false;
+    }
   }
 
   function create () {
@@ -318,9 +349,7 @@ window.onload = function() {
     setUpTiles();
     setUpGrid();
     setUpDisplay();
-    if (!("grid" in localStorage)) {
-      setUpInstructions();
-    }
+    displayInstructionsModal(true);
     gameEnded = false;
     game.input.onTap.add(onTap, this);
     game.stage.backgroundColor = "#f5f5dc";
@@ -373,7 +402,17 @@ window.onload = function() {
     for (let i = 0; i < 5; i++) {
       for (let j = 0; j < grid.grid[i].length; j++) {
         if (grid.grid[i][j].value != null) {
-          let text = game.add.text(starterPositions[i][0] + 90 * j, starterPositions[i][1] - 54 * j, grid.grid[i][j].value, { font: valueSizes[grid.grid[i][j].value] + "px upheaval", fill: "#" + valueColors[grid.grid[i][j].value], boundsAlignH: "center", boundsAlignV: "middle"})
+          let text = game.add.text(
+            starterPositions[i][0] + 90 * j,
+            starterPositions[i][1] - 54 * j + 100,
+            grid.grid[i][j].value,
+            {
+              font: valueSizes[grid.grid[i][j].value] + "px upheaval",
+              fill: "#" + valueColors[grid.grid[i][j].value],
+              boundsAlignH: "center",
+              boundsAlignV: "middle"
+            },
+          );
           text.setTextBounds(-50, -50, 100, 100);
           tiles.push(text);
           gameDisplay.add(text);
@@ -397,32 +436,35 @@ window.onload = function() {
     return true;
   }
 
-  function displayEnding() {
-    instructionsDisplay = game.add.group();
-    var bar = game.add.graphics();
-    bar.beginFill(0x222222, 1);
-    bar.lineStyle(5, 0xffffff, 1);
-    bar.drawRoundedRect(20, game.height / 2 - 150, game.width - 40, 320);
-    instructionsDisplay.add(bar);
+  displayingEnding = false;
+  function displayGameOverModal() {
+    if (!this.displayingEnding) {
+      instructionsDisplay.destroy();
+      endingModalDisplay = game.add.group();
+      endingBar = game.add.graphics();
+      endingBar.beginFill(0x222222, 1);
+      endingBar.lineStyle(5, 0xffffff, 1);
+      endingBar.drawRoundedRect(20, 0, game.width - 40, 100);
+      endingModalDisplay.add(endingBar);
 
-    var style = { font: "28px upheaval", fill: "#fff", boundsAlignH: "center", boundsAlignV: "middle", wordWrap: true, wordWrapWidth: game.width - 100 };
-    var text = game.add.text(0, 0, "GAME OVER\n\nNo more valid moves!", style);
-    text.setTextBounds(0, game.height / 2 - 145, game.width, 250);
-    instructionsDisplay.add(text);
+      var style = { font: "28px upheaval", fill: "#fff", boundsAlignH: "center", boundsAlignV: "middle", wordWrap: true, wordWrapWidth: game.width - 100 };
+      var text = game.add.text(0, 0, "No more valid moves...", style);
+      text.setTextBounds(0, -40, game.width, 160);
+      endingModalDisplay.add(text);
 
-    style = { font: "18px upheaval", fill: "#fff", boundsAlignH: "center", textAlign: "center", wordWrap: true, wordWrapWidth: game.width - 100 };
-    text = game.add.text(0, 0, "Press enter to try again...", style);
-    text.setTextBounds(0, game.height / 2 + 130, game.width, 250);
-    instructionsDisplay.add(text);
+      style = { font: "20px upheaval", fill: "#fff", boundsAlignH: "center", textAlign: "center", wordWrap: true, wordWrapWidth: game.width - 100 };
+      text = game.add.text(0, 0, "Press enter to try again.", style);
+      text.setTextBounds(0, 56, game.width, 250);
+      endingModalDisplay.add(text);
+      this.displayingEnding = true;
+    }
   }
 
   function processUserInput() {
     if (!gameEnded) {
+      displayInstructionsModal();
       if (pressEnabled){
         if (keyDown()) {
-          if (typeof instructionsDisplay != "undefined" && instructionsDisplay.parent != null) {
-            instructionsDisplay.destroy(true);
-          }
           pressEnabled = false;
           var oldGrid = grid.toString();
           grid.shiftTowards(directionPressed());
@@ -431,6 +473,7 @@ window.onload = function() {
             addRandomBlock();
           }
           if (unableToMove()) {
+            console.log('can no longer move');
             gameEnded = true;
           } else {
             localStorage.setItem("grid", "" + grid.serialize())
@@ -440,11 +483,10 @@ window.onload = function() {
         pressEnabled = true;
       }
     } else {
-      displayEnding();
+      displayGameOverModal();
       if (enterKey.isDown) {
-        if (typeof instructionsDisplay != "undefined" && instructionsDisplay.parent != null) {
-          instructionsDisplay.destroy(true);
-        }
+        endingModalDisplay.destroy();
+        endingBar.destroy();
         localStorage.clear();
         setUpGrid();
         gameEnded = false;
@@ -457,5 +499,5 @@ window.onload = function() {
     clearOldTiles();
     generateNewTiles();
     processUserInput();
-    }
+  }
 };

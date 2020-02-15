@@ -4,9 +4,9 @@ body {
 .game-container {
   display: flex;
   align-items: center;
-  padding-top: 70px;
+  padding-top: 20px;
   flex-direction: column;
-  width: 585px;
+  width: 652px;
   margin: auto;
 }
 .game-title {
@@ -21,7 +21,7 @@ body {
   font-family: upheaval;
   margin: 5px;
   align-self: flex-end;
-  color: #5bb;
+  color: #087575;
   flex-direction: column;
   align-items: flex-end;
 }
